@@ -1,0 +1,40 @@
+name: Build IMS Android Full
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Flet
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install flet==0.86.5 flet-cli==0.86.5
+
+      - name: Build APK
+        working-directory: android_app
+        run: |
+          flet build apk --permissions camera
+
+      - name: Find APK
+        run: |
+          find android_app -type f -name "*.apk" -print
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: IMS-Android-Full-APK
+          path: android_app/build/**/*.apk
+          if-no-files-found: error
